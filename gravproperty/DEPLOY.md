@@ -21,7 +21,14 @@ tab → **New repository variable**:
 | name | value |
 | --- | --- |
 | `VITE_MSAL_CLIENT_ID` | Application (client) ID from the Azure app registration |
-| `VITE_MSAL_TENANT_ID` | Directory (tenant) ID |
+| `VITE_MSAL_TENANT_ID` | `385f3470-aae2-44d0-8cff-1da9ffd31951` |
+
+The tenant ID is the gravitygh.co.za directory and is fixed — it is public
+information, returned by Microsoft to anyone who asks:
+`login.microsoftonline.com/gravitygh.co.za/v2.0/.well-known/openid-configuration`.
+
+The client ID does not exist until someone creates the app registration in
+Azure — see [AUTH_SETUP.md](AUTH_SETUP.md). There is no default value for it.
 
 Variables, not secrets — both end up in the JavaScript bundle regardless, and
 this repo is public. That's normal for a SPA and safe: they're identifiers,
