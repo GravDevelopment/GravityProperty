@@ -35,12 +35,26 @@ jobs:
 
       # Client ID and tenant ID are baked into the bundle at build time. They
       # are public identifiers, not secrets — Microsoft still verifies every
-      # sign-in against the single-tenant app registration. Repo variables,
-      # not secrets, so they stay readable in the Actions UI.
+      # sign-in against the single-tenant app registration. Read from either
+      # the Variables or the Secrets tab, since either is a reasonable place
+      # to have put them and guessing wrong just produces a broken site.
       - run: npm run build
         env:
-          VITE_MSAL_CLIENT_ID: ${{ vars.VITE_MSAL_CLIENT_ID }}
-          VITE_MSAL_TENANT_ID: ${{ vars.VITE_MSAL_TENANT_ID }}
+          VITE_MSAL_CLIENT_ID: ${{ vars.VITE_MSAL_CLIENT_ID || secrets.VITE_MSAL_CLIENT_ID }}
+          VITE_MSAL_TENANT_ID: ${{ vars.VITE_MSAL_TENANT_ID || secrets.VITE_MSAL_TENANT_ID }}
+
+      # Missing config makes the app render a "not configured yet" notice
+      # rather than crash, so without this check the deploy goes green and
+      # publishes a site nobody can sign into.
+      - name: Fail if sign-in config did not reach the bundle
+        env:
+          CLIENT_ID: ${{ vars.VITE_MSAL_CLIENT_ID || secrets.VITE_MSAL_CLIENT_ID }}
+        run: |
+          if [ -z "$CLIENT_ID" ] || ! grep -q "$CLIENT_ID" dist/assets/*.js; then
+            echo "::error::VITE_MSAL_CLIENT_ID is empty or absent from the build."
+            echo "::error::Set it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
 
       # path is relative to the workspace root, not the working-directory above.
       - uses: actions/upload-pages-artifact@v3
