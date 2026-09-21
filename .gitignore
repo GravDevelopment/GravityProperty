@@ -1,0 +1,11 @@
+# Visual Studio cache and build output (regenerated locally, not source)
+.vs/
+obj/
+bin/
+
+# Claude Code — personal permission allowlist, not shared
+.claude/settings.local.json
+
+# OS junk
+.DS_Store
+Thumbs.db

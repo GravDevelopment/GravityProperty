@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gravproperty",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "gravproperty", "run", "dev"],
+      "port": 63734
+    }
+  ]
+}
