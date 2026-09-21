@@ -89,7 +89,13 @@ export const removeNote = (u, stepId, noteId) => ({
   notes: { ...u.notes, [stepId]: notesFor(u, stepId).filter((n) => n.id !== noteId) },
 })
 
-const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+// Excel/Sheets treat a leading = + - @ as a formula, so a unit name like
+// "=HYPERLINK(...)" would execute when someone opens the exported report.
+// Prefix those with an apostrophe so they stay text.
+const esc = (v) => {
+  const s = String(v ?? '')
+  return `"${(/^[=+\-@\t\r]/.test(s) ? `'${s}` : s).replace(/"/g, '""')}"`
+}
 
 export const toCSV = (units, now = Date.now()) => {
   const head = [

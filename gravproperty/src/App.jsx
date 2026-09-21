@@ -140,6 +140,12 @@ function App() {
         </div>
       </header>
 
+      <p className="local-only">
+        Your units and documents are saved in this browser only — colleagues
+        signed in elsewhere can't see them, and clearing site data loses them.
+        Export a CSV to share or keep a copy.
+      </p>
+
       <div className="stats">
         <div className="stat-card">
           <span className="stat-card-value">{stats.total}</span>

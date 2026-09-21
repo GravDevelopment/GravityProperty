@@ -789,3 +789,15 @@ button:disabled {
     flex: 1 1 45%;
   }
 }
+
+.local-only {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border: 1px solid rgba(217, 119, 6, 0.4);
+  border-left-width: 3px;
+  border-radius: 8px;
+  background: rgba(217, 119, 6, 0.1);
+  color: var(--text-h);
+  font-size: 13px;
+  line-height: 1.5;
+}

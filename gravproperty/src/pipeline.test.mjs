@@ -125,3 +125,11 @@ test('CSV escapes quotes/commas and has a column per step', () => {
   assert.match(row, /"Application form received"/) // current step
   assert.match(row, /"1\/14"/)
 })
+
+test('CSV neutralises spreadsheet formulas in user-entered text', () => {
+  const u = newUnit({ unit: '=HYPERLINK("http://evil","click")', applicant: '+1', owner: 'Ewan' })
+  const row = toCSV([u]).split('\n')[1]
+  assert.match(row, /"'=HYPERLINK/)
+  assert.match(row, /"'\+1"/)
+  assert.match(row, /"Ewan"/) // ordinary values untouched
+})

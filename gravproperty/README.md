@@ -1,16 +1,45 @@
-# React + Vite
+# GravProperty
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Tenant onboarding pipeline for the letting desk. Tracks each unit through the
+14 steps from "advertise" to "30-day follow-up", with document attachments,
+progress notes, and a CSV export.
 
-Currently, two official plugins are available:
+React + Vite. Sign-in is Microsoft Entra ID, locked to the gravitygh.co.za
+tenant — see [AUTH_SETUP.md](AUTH_SETUP.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Running it
 
-## React Compiler
+```
+npm install
+cp .env.example .env.local   # fill in the two Azure IDs
+npm run dev                  # http://localhost:63734
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| command | does |
+| --- | --- |
+| `npm run dev` | dev server on port 63734 |
+| `npm run build` | production build into `dist/` |
+| `npm run preview` | serve the built `dist/` locally |
+| `npm test` | pipeline logic tests (`node --test`) |
+| `npm run lint` | oxlint |
 
-## Expanding the Oxlint configuration
+## How it's put together
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+| file | what's in it |
+| --- | --- |
+| `src/pipeline.js` | all the pipeline logic — steps, phases, progress, CSV. Pure, no React. |
+| `src/pipeline.test.mjs` | tests for the above |
+| `src/App.jsx` | the whole UI |
+| `src/auth.js` | MSAL redirect sign-in |
+| `src/files.js` | uploaded document blobs, in IndexedDB |
+
+## Where the data lives
+
+**Per browser, on the signed-in person's own machine.** Unit records go in
+`localStorage`; uploaded documents go in IndexedDB. Nothing is sent to a
+server.
+
+That means two agents on two laptops each see their own separate pipeline,
+and clearing browser data loses everything. Fine for one person trying it
+out; it is the thing to fix before the whole desk relies on it. See
+[DEPLOY.md](DEPLOY.md).
