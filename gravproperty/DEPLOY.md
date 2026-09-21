@@ -1,4 +1,4 @@
-# Deploying to property.gravitygh.co.za
+# Deploying to gravityproperties.co.za
 
 Hosting is **GitHub Pages**, built by GitHub Actions on every push to `main`
 ([.github/workflows/deploy.yml](../.github/workflows/deploy.yml)). Nothing to
@@ -29,21 +29,48 @@ not credentials. Access control is Microsoft enforcing the single-tenant app
 registration at sign-in, not these values being hidden. See
 [AUTH_SETUP.md](AUTH_SETUP.md).
 
-## 3. DNS at Alesco
+## 3. DNS at domains.co.za
 
-`gravitygh.co.za` is served by `ns1/ns2/ns3.alesco.co.za`, so add this in the
-Alesco control panel (or ask them to):
+The domain is registered through **domains.co.za** (nameservers
+`ns1`–`ns4.tld-ns.net`/`.com`). Log into the domains.co.za control panel →
+DNS / zone editor for `gravityproperties.co.za`.
+
+**Delete** the existing parking record — an `A` on `@` pointing at
+`169.239.219.58` — and the `www` record beside it. Then add:
 
 | type | host | value |
 | --- | --- | --- |
-| CNAME | `property` | `gravdevelopment.github.io.` |
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| CNAME | `www` | `gravdevelopment.github.io.` |
 
-Only the `property` subdomain — the apex `gravitygh.co.za` keeps pointing at
-`41.204.209.246` and is untouched.
+All four A records, not one — they're GitHub's Pages edge and the redundancy
+is the point. An apex can't be a CNAME, which is why this isn't a single
+record like a subdomain would be.
 
-Give it up to an hour, then back in **Settings → Pages** wait for the domain
-check to go green and tick **Enforce HTTPS**. The certificate is issued
-automatically once DNS resolves.
+The `www` CNAME is what makes `www.gravityproperties.co.za` work; GitHub
+redirects it to the bare domain automatically.
+
+There are currently no `MX` records on this domain, so none of this affects
+email. If mail is ever added here, leave the `MX` records alone — they're
+independent of the `A` records above.
+
+Give it up to an hour, then check:
+
+```
+nslookup gravityproperties.co.za 8.8.8.8
+```
+
+Once that returns the four `185.199.x` addresses, go back to **Settings →
+Pages**, wait for the domain check to go green, and tick **Enforce HTTPS**.
+The certificate is issued automatically.
+
+If the certificate is still pending after an hour with DNS resolving
+correctly, ask domains.co.za whether a `CAA` record exists on the domain. If
+one does and it doesn't list `letsencrypt.org`, GitHub can't issue and that
+entry needs adding.
 
 ## 4. Add the live URL to Azure
 
@@ -54,11 +81,17 @@ registrations** → the GravProperty app → **Authentication** → under the
 **Single-page application** platform → **Add URI**:
 
 ```
-https://property.gravitygh.co.za
+https://gravityproperties.co.za
 ```
 
 No trailing slash. Keep `http://localhost:63734` in the list so local dev
 still works.
+
+Note this is a *different* domain from the Microsoft 365 tenant
+(`gravitygh.co.za`). That's fine — the redirect URI is just where Microsoft
+sends the browser back to, and has nothing to do with which accounts may sign
+in. Access is still restricted to gravitygh.co.za accounts by the
+single-tenant app registration.
 
 ## Deploying
 
@@ -84,8 +117,9 @@ scoping properly rather than bolting on.
 
 ## Other notes
 
-- **Different subdomain?** Change [public/CNAME](public/CNAME), the DNS record
-  in step 3, and the Azure redirect URI in step 4 to match.
+- **Moving to a subdomain later?** Change [public/CNAME](public/CNAME) to the
+  new name, swap the four apex `A` records for a single `CNAME` pointing at
+  `gravdevelopment.github.io.`, and update the Azure redirect URI to match.
 - **Want to test at `gravdevelopment.github.io/GravityProperty/` first?**
   Delete `public/CNAME` and set `base: '/GravityProperty/'` in
   `vite.config.js`, then add that URL as a redirect URI too. Reverse both when
